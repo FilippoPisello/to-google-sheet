@@ -30,11 +30,7 @@ class GoogleSheet(Spreadsheet):
         if clear_content:
             self.sheet.clear()
 
-        if header:
-            self._write_cells(self.header, self.df.columns)
-        if self.keep_index:
-            self._write_cells(self.index, self.df.index)
-        self._write_cells(self.body, self.df)
+        self.sheet.batch_update(self._batch_list(header), )
 
     # ---------------------------------------------
     # Sub functions
@@ -60,29 +56,27 @@ class GoogleSheet(Spreadsheet):
         # Get the instance of the Spreadsheet
         return client.open(self.workbook_name)
 
-    def _write_cells(self, spreadsheet_element, table_portion):
-        values_list = self._flatten_list(table_portion.values.tolist())
-        cells = self.sheet.range(spreadsheet_element.cells_range)
+    def _batch_list(self, keep_header):
+        output = [{"range" : self.body.cells_range,
+                   "values" : self.df.values.tolist()}]
 
-        if len(values_list) != len(cells):
-            raise IndexError("Len of cells range and values list do not match")
-
-        for cell, value_ in zip(cells, values_list):
-            cell.value = value_
-
-        self.sheet.update_cells(cells)
-        return
-
-    @staticmethod
-    def _flatten_list(values_list):
-        """
-        Given iterable, returns a list. If item in iterable is tuple or list, the
-        sub elements are added to output, else item is output.
-        """
-        output = []
-        for element in values_list:
-            if isinstance(element, (list, tuple, set)):
-                output.extend(element)
-            else:
-                output.append(element)
+        if keep_header:
+            output.append({"range" : self.header.cells_range,
+                           "values" : self._columns_for_batch()})
+        if self.keep_index:
+            output.append({"range" : self.index.cells_range,
+                           "values" : self._index_for_batch()})
         return output
+
+    def _columns_for_batch(self):
+        if self.indexes_depth[1] > 1:
+            output = []
+            for level in range(self.indexes_depth[1]):
+                output.append([i[level] for i in self.df.columns.values.tolist()])
+            return output
+        return [self.df.columns.values.tolist()]
+
+    def _index_for_batch(self):
+        if self.indexes_depth[0] > 1:
+            return self.df.index.values.tolist()
+        return [[x] for x in  self.df.index.values.tolist()]
