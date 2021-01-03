@@ -1,53 +1,53 @@
-#!/usr/bin/env python
-
+#Author: Filippo Pisello
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+import sys
+sys.path.append(r"C:\Users\Filippo Pisello\Desktop\Python\Git Projects\Git_Spreadsheet")
+from spreadsheet import Spreadsheet
 
-class Google_sheet:
-    def __init__(self, dataframe, json_file_name, google_workbook_name, sheet_number=0,
-                 fillna_with=" ", overwrite_sheet=True, keep_header=False, heading_height=1):
-        self.df = dataframe
+class GoogleSheet(Spreadsheet):
+    def __init__(self, dataframe, json_file_name, google_workbook_name,
+                 index=False, skip_rows=0, skip_columns=0,
+                 correct_lists=True, sheet_number=0):
+        super().__init__(dataframe, index, skip_rows, skip_columns, correct_lists)
         self.json_file = json_file_name
         self.workbook_name = google_workbook_name
         self.sheet_number = sheet_number
-        self.fillna_with = fillna_with
-        self.overwrite_sheet = overwrite_sheet
-        self.keep_header = keep_header
-        self.heading_height = heading_height
 
-        self.sheet = ""
-        self.sheet_instance = ""
-        self.starting_row = ""
-
-        self.to_google_sheet()
+        self.workbook = None
+        self.sheet = None
 
     # ---------------------------------------------
     # Main function
     # ---------------------------------------------
-    def to_google_sheet(self):
-        self.__prepare_table()
-        self.sheet = self.__get_authorization()
-        self.sheet_instance = self.sheet.get_worksheet(self.sheet_number)
-        self.starting_row = self.__find_starting_row()
-        self.sheet_instance.insert_rows(self.df.values.tolist(),
-                                        row=self.starting_row)
-        if not self.keep_header and self.overwrite_sheet:
-            self.sheet_instance.insert_rows([self.df.columns.tolist()],
-                                            row=self.starting_row)
+    def to_google_sheet(self, fill_na_with=" ", clear_content=False, header=True):
+        self._prepare_table(fill_na_with)
+
+        self.workbook = self._get_authorization()
+        self.sheet = self.workbook.get_worksheet(self.sheet_number)
+
+        if clear_content:
+            self.sheet.clear()
+
+        if header:
+            self._write_cells(self.header, self.df.columns)
+        if self.keep_index:
+            self._write_cells(self.index, self.df.index)
+        self._write_cells(self.body, self.df)
 
     # ---------------------------------------------
     # Sub functions
     # ---------------------------------------------
-    def __prepare_table(self):
+    def _prepare_table(self, fill_na_with):
         # Convert datetime columns into string
         for column in self.df.columns:
             if self.df[column].dtype in ["datetime64[ns]", "datetime64"]:
                 self.df[column] = self.df[column].astype(str)
         # Replace missing values with something else
-        self.df.fillna(self.fillna_with, inplace=True)
+        self.df.fillna(fill_na_with, inplace=True)
 
-    def __get_authorization(self):
+    def _get_authorization(self):
         # Define the scope
         scope = ['https://spreadsheets.google.com/feeds',
                  'https://www.googleapis.com/auth/drive']
@@ -60,10 +60,29 @@ class Google_sheet:
         # Get the instance of the Spreadsheet
         return client.open(self.workbook_name)
 
-    def __find_starting_row(self):
-        if self.overwrite_sheet:
-            header_coefficient = 1 + self.keep_header * self.heading_height
-            self.sheet_instance.delete_rows(header_coefficient, self.sheet_instance.row_count - 1)
-            return header_coefficient
-        else:
-            return self.sheet_instance.row_count
+    def _write_cells(self, spreadsheet_element, table_portion):
+        values_list = self._flatten_list(table_portion.values.tolist())
+        cells = self.sheet.range(spreadsheet_element.cells_range)
+
+        if len(values_list) != len(cells):
+            raise IndexError("Len of cells range and values list do not match")
+
+        for cell, value_ in zip(cells, values_list):
+            cell.value = value_
+
+        self.sheet.update_cells(cells)
+        return
+
+    @staticmethod
+    def _flatten_list(values_list):
+        """
+        Given iterable, returns a list. If item in iterable is tuple or list, the
+        sub elements are added to output, else item is output.
+        """
+        output = []
+        for element in values_list:
+            if isinstance(element, (list, tuple, set)):
+                output.extend(element)
+            else:
+                output.append(element)
+        return output
