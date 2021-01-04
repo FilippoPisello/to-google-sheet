@@ -7,13 +7,24 @@ sys.path.append(r"C:\Users\Filippo Pisello\Desktop\Python\Git Projects\Git_Sprea
 from spreadsheet import Spreadsheet
 
 class GoogleSheet(Spreadsheet):
+    """
+    Class finalized to export a pandas data frame to a Google Sheet workbook.
+
+    ---------------
+    The class intakes as main argument a pandas dataframe. Given the json file
+    with the authentication keys, it connects with a Google Sheet workbook and
+    efficiently uploads to it the data frame content.
+
+    It can be decided where to place the content within the target sheet through
+    the
+    """
     def __init__(self, dataframe, json_file_name, google_workbook_name,
                  index=False, skip_rows=0, skip_columns=0,
-                 correct_lists=True, sheet_number=0):
+                 correct_lists=True, sheet=0):
         super().__init__(dataframe, index, skip_rows, skip_columns, correct_lists)
         self.json_file = json_file_name
         self.workbook_name = google_workbook_name
-        self.sheet_number = sheet_number
+        self.sheet_id = sheet
 
         self.workbook = None
         self.sheet = None
@@ -25,12 +36,12 @@ class GoogleSheet(Spreadsheet):
         self._prepare_table(fill_na_with)
 
         self.workbook = self._get_authorization()
-        self.sheet = self.workbook.get_worksheet(self.sheet_number)
+        self.sheet = self.get_sheet()
 
         if clear_content:
             self.sheet.clear()
 
-        self.sheet.batch_update(self._batch_list(header), )
+        self.sheet.batch_update(self._batch_list(header))
 
     # ---------------------------------------------
     # Sub functions
@@ -55,6 +66,11 @@ class GoogleSheet(Spreadsheet):
 
         # Get the instance of the Spreadsheet
         return client.open(self.workbook_name)
+
+    def _get_sheet(self):
+        if isinstance(self.sheet_id, str):
+            return self.workbook.worksheet(self.sheet_id)
+        return self.workbook.get_worksheet(self.sheet_id)
 
     def _batch_list(self, keep_header):
         output = [{"range" : self.body.cells_range,
