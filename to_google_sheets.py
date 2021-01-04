@@ -25,17 +25,11 @@ class GoogleSheet(Spreadsheet):
         self.workbook_name = google_workbook_name
         self.sheet_id = sheet
 
-        self.workbook = None
-        self.sheet = None
-
     # ---------------------------------------------
     # Main function
     # ---------------------------------------------
     def to_google_sheet(self, fill_na_with=" ", clear_content=False, header=True):
         self._prepare_table(fill_na_with)
-
-        self.workbook = self._get_authorization()
-        self.sheet = self.get_sheet()
 
         if clear_content:
             self.sheet.clear()
@@ -53,7 +47,8 @@ class GoogleSheet(Spreadsheet):
         # Replace missing values with something else
         self.df.fillna(fill_na_with, inplace=True)
 
-    def _get_authorization(self):
+    @property
+    def workbook(self):
         # Define the scope
         scope = ['https://spreadsheets.google.com/feeds',
                  'https://www.googleapis.com/auth/drive']
@@ -66,7 +61,8 @@ class GoogleSheet(Spreadsheet):
         # Get the instance of the Spreadsheet
         return client.open(self.workbook_name)
 
-    def _get_sheet(self):
+    @property
+    def sheet(self):
         if isinstance(self.sheet_id, str):
             return self.workbook.worksheet(self.sheet_id)
         return self.workbook.get_worksheet(self.sheet_id)
