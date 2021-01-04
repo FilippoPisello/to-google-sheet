@@ -19,9 +19,8 @@ class GoogleSheet(Spreadsheet):
     the
     """
     def __init__(self, dataframe, json_file_name, google_workbook_name,
-                 index=False, skip_rows=0, skip_columns=0,
-                 correct_lists=True, sheet=0):
-        super().__init__(dataframe, index, skip_rows, skip_columns, correct_lists)
+                 index=False, starting_cell="A1", correct_lists=True, sheet=0):
+        super().__init__(dataframe, index, starting_cell, correct_lists)
         self.json_file = json_file_name
         self.workbook_name = google_workbook_name
         self.sheet_id = sheet
