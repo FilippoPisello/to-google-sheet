@@ -4,6 +4,7 @@ from typing import List, Dict, Union
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
+# Note: the following is just a local import, you can do it as you want
 import sys
 sys.path.append(r"C:\Users\Filippo Pisello\Desktop\Python\Git Projects\Git_Spreadsheet")
 from spreadsheet import Spreadsheet
@@ -24,9 +25,6 @@ class GoogleSheet(Spreadsheet):
     ----------------
     dataframe : pandas dataframe object (mandatory)
         Dataframe to be considered.
-    json_file_name: str (mandatory)
-        The .json file exported from the Google Sheet API which contains the
-        authentication key.
     google_workbook_name: str (mandatory)
         The name of the Google Sheet workbook which should receive the data.
     sheet_id: str or int, default=0
@@ -42,10 +40,9 @@ class GoogleSheet(Spreadsheet):
         Google Sheet compatibility. Type help(GoogleSheet.correct_lists_for_export)
         for further details.
     """
-    def __init__(self, dataframe, json_file_name: str, google_workbook_name: str,
-                 sheet_id=0, index=False, starting_cell="A1", correct_lists=True):
+    def __init__(self, dataframe, google_workbook_name: str, sheet_id=0,
+                 index=False, starting_cell="A1", correct_lists=True):
         super().__init__(dataframe, index, starting_cell, correct_lists)
-        self.json_file = json_file_name
         self.workbook_name = google_workbook_name
         self.sheet_id = sheet_id
 
@@ -57,20 +54,16 @@ class GoogleSheet(Spreadsheet):
     @property
     def workbook(self) -> gspread.Spreadsheet:
         """
-        Gathers the authorization given the json credentials and returns a
-        workbook object
+        Gathers the authorization and returns a workbook object.
+
+        ----------------
+        This method requires the a json authorization file in the right location
+        as explained here: https://gspread.readthedocs.io/en/latest/oauth2.html
         """
-        # Define the scope
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        # Add credentials to the account
-        creds = ServiceAccountCredentials.from_json_keyfile_name(self.json_file,
-                                                                 scope)
-        # Authorize the clientsheet
-        client = gspread.authorize(creds)
+        gc = gspread.service_account()
 
         # Get the instance of the Spreadsheet
-        return client.open(self.workbook_name)
+        return gc.open(self.workbook_name)
 
     @property
     def sheet(self) -> gspread.Worksheet:
