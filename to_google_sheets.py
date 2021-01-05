@@ -49,9 +49,42 @@ class GoogleSheet(Spreadsheet):
         self.workbook_name = google_workbook_name
         self.sheet_id = sheet_id
 
-    # ---------------------------------------------
-    # Main function
-    # ---------------------------------------------
+    # -------------------------------------------------------------------------
+    # 1 - Main Elements
+    # -------------------------------------------------------------------------
+    # 1.1 - Properties
+    # --------------------------------
+    @property
+    def workbook(self) -> gspread.Spreadsheet:
+        """
+        Gathers the authorization given the json credentials and returns a
+        workbook object
+        """
+        # Define the scope
+        scope = ['https://spreadsheets.google.com/feeds',
+                 'https://www.googleapis.com/auth/drive']
+        # Add credentials to the account
+        creds = ServiceAccountCredentials.from_json_keyfile_name(self.json_file,
+                                                                 scope)
+        # Authorize the clientsheet
+        client = gspread.authorize(creds)
+
+        # Get the instance of the Spreadsheet
+        return client.open(self.workbook_name)
+
+    @property
+    def sheet(self) -> gspread.Worksheet:
+        """
+        Returns the sheet object corresponding to the workbook's sheet, given
+        user input on sheet_id.
+        """
+        if isinstance(self.sheet_id, str):
+            return self.workbook.worksheet(self.sheet_id)
+        return self.workbook.get_worksheet(self.sheet_id)
+
+    # --------------------------------
+    # 1.2 - Main Methods
+    # --------------------------------
     def to_google_sheet(self, fill_na_with=" ", clear_sheet=False, header=True):
         """
         Exports data frame to target sheet within a Google Sheet workbook.
@@ -88,9 +121,9 @@ class GoogleSheet(Spreadsheet):
 
         self.sheet.batch_update(self._batch_list(header))
 
-    # ---------------------------------------------
-    # Sub functions
-    # ---------------------------------------------
+    # -------------------------------------------------------------------------
+    # 2 - Worker Methods
+    # -------------------------------------------------------------------------
     def _prepare_table(self, fill_na_with: str):
         """
         Converts datetime columns into str and fills missing values.
@@ -101,34 +134,6 @@ class GoogleSheet(Spreadsheet):
                 self.df[column] = self.df[column].astype(str)
         # Replace missing values with something else
         self.df.fillna(fill_na_with, inplace=True)
-
-    @property
-    def workbook(self) -> gspread.Spreadsheet:
-        """
-        Gathers the authorization given the json credentials and returns a
-        workbook object
-        """
-        # Define the scope
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-        # Add credentials to the account
-        creds = ServiceAccountCredentials.from_json_keyfile_name(self.json_file,
-                                                                 scope)
-        # Authorize the clientsheet
-        client = gspread.authorize(creds)
-
-        # Get the instance of the Spreadsheet
-        return client.open(self.workbook_name)
-
-    @property
-    def sheet(self) -> gspread.Worksheet:
-        """
-        Returns the sheet object corresponding to the workbook's sheet, given
-        user input on sheet_id.
-        """
-        if isinstance(self.sheet_id, str):
-            return self.workbook.worksheet(self.sheet_id)
-        return self.workbook.get_worksheet(self.sheet_id)
 
     def _batch_list(self, keep_header: bool) -> List[Dict]:
         """
