@@ -2,7 +2,6 @@
 from typing import List, Dict, Union
 
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 
 # Note: the following is just a local import, you can do it as you want
 import sys
