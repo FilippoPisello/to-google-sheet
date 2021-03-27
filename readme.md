@@ -15,7 +15,7 @@ The GoogleSheet class allows the user to rapidly export a pandas data frame to a
 
 To be able to complete these operations, some quick steps on the Google Console should be carried out. [This article from the gspread library ](https://gspread.readthedocs.io/en/latest/oauth2.html) provides a detailed explanation on what to do. In summary:
 - Obtain a json file with the credentials through the Google Developers Console.
-- Place the file in the right folder of your device.
+- Place the file in the right folder of your device if you want to call it freely from any script.
 
 CustomExcel is a subclass of the Spreadsheet class, whose code and doc can be found [at this link](https://github.com/FilippoPisello/Spreadsheet).
 
@@ -64,6 +64,8 @@ There are then two native arguments of the class:
   - The name of the Google Sheet project which should be the data upload target.
 - **sheet_id**: str or int, default=0
   - Argument to identify the target sheet within the workbook. If int, it is interpreted as sheet index, if str as the sheet name.
+- **json_file_path**: str, default=None
+  - If None, it is assumed that the json file for the authentication is in the default folder "~/.config/gspread/your_file.json". Provide a path to make the class search for the file elsewhere.
 
 ## 3.2. Attributes
 The CustomExcel object inherits four attributes from the Spreadsheet class:

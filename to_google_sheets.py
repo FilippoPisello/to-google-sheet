@@ -40,12 +40,17 @@ class GoogleSheet(Spreadsheet):
         readable in the traditional spreadsheet softwares. It helps with the
         Google Sheet compatibility. Type help(GoogleSheet.correct_lists_for_export)
         for further details.
+    json_file_path: str, default=None
+        If None, it is assumed that the json file for the authentication is in
+        the default folder "~/.config/gspread/your_file.json". Provide a path
+        to make the class search for the file elsewhere.
     """
 
     def __init__(self, dataframe, google_workbook_name: str, sheet_id=0,
-                 index=False, starting_cell="A1", correct_lists=True):
+                 index=False, starting_cell="A1", correct_lists=True,
+                 json_file_path=None):
         super().__init__(dataframe, index, starting_cell, correct_lists)
-        self.workbook = self.get_workbook(google_workbook_name)
+        self.workbook = self.get_workbook(google_workbook_name, json_file_path)
         self.sheet = self.get_sheet(sheet_id)
 
     # -------------------------------------------------------------------------
@@ -54,7 +59,7 @@ class GoogleSheet(Spreadsheet):
     # 1.1 - Functions to define the class attributes
     # --------------------------------
     @staticmethod
-    def get_workbook(workbook_name) -> gspread.Spreadsheet:
+    def get_workbook(workbook_name, json_file_path) -> gspread.Spreadsheet:
         """
         Gathers the authorization and returns a workbook object.
 
@@ -62,8 +67,8 @@ class GoogleSheet(Spreadsheet):
         This method requires the a json authorization file in the right location
         as explained here: https://gspread.readthedocs.io/en/latest/oauth2.html
         """
-        gc = gspread.service_account()
-
+        # Authenticate
+        gc = gspread.service_account(filename=json_file_path)
         # Get the instance of the Spreadsheet
         return gc.open(workbook_name)
 
