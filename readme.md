@@ -73,8 +73,8 @@ The CustomExcel object inherits four attributes from the Spreadsheet class:
 - **self.skip_cols**: int
 
 There are then two native attributes:
-- **self.google_workbook_name**: str
-- **self.id**: int or str
+- **self.sheet**: gspread.Spreadsheet object
+- **self.workbook**: gspread.Worksheet object
 
 ## 3.3. Properties
 The CustomExcel object inherits eight properties from the Spreadsheet class:
@@ -89,10 +89,6 @@ The CustomExcel object inherits eight properties from the Spreadsheet class:
 
 Details on these can be found at this [_link_](https://github.com/FilippoPisello/Spreadsheet).
 
-It has also two native properites:
-- **self.sheet**: gspread.Spreadsheet object
-- **self.workbook**: gspread.Worksheet
-
 ## 3.4. Methods
 This section just includes the methods which are meant to be accessed by the user. These can be found in part 1. For further info on the worker methods please consult their docstrings.
 
@@ -102,7 +98,7 @@ obj.to_google_sheet(self, fill_na_with=" ", clear_sheet=False, header=True)
 ```
 Exports data frame to target sheet within a Google Sheet workbook.
 
-Before the upload, the function slightly adapts the content of the data frame to ensure  compatibility with Google Sheet. Dates are always turned to str and  missing values are filled with str. By default, it is also applied a correction to lists.
+Before the upload, the function slightly adapts the content of the data frame to ensure  compatibility with Google Sheet. Dates and categories are turned to str and missing values are filled with str. By default, it is also applied a correction to lists.
 
 For the upload, the batch update method is used to ensure the maximum efficiency possible. It also limits the number of request fired to the Google Sheet API.
 
