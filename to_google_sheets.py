@@ -118,13 +118,15 @@ class GoogleSheet(Spreadsheet):
     # -------------------------------------------------------------------------
     def _prepare_table(self, fill_na_with: str):
         """
-        Converts datetime columns into str and fills missing values.
+        Converts datetime and category columns into str and fills missing values.
         """
         # Convert datetime columns into string
         for column in self.df.columns:
             date_types = ["datetime64[ns]", "datetime64", "timedelta64[ns]"]
             if self.df[column].dtype in date_types:
                 self.df[column] = self.df[column].astype(str).str.replace("NaT", "")
+            elif self.df[column].dtype.name == "category":
+                self.df[column] = self.df[column].astype(str)
         # Replace missing values with something else
         self.df.fillna(fill_na_with, inplace=True)
 
