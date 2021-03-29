@@ -67,8 +67,12 @@ class GoogleSheet(Spreadsheet):
         This method requires the a json authorization file in the right location
         as explained here: https://gspread.readthedocs.io/en/latest/oauth2.html
         """
-        # Authenticate
-        gc = gspread.service_account(filename=json_file_path)
+        # Authenticate: need this if-else structure cause default value for
+        # filename changes from user to user
+        if json_file_path is None:
+            gc = gspread.service_account()
+        else:
+            gc = gspread.service_account(filename=json_file_path)
         # Get the instance of the Spreadsheet
         return gc.open(workbook_name)
 
