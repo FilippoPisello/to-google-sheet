@@ -133,10 +133,10 @@ class GoogleSheet(Spreadsheet):
         """
         # Convert datetime columns into string
         for column in self.df.columns:
-            date_types = ["datetime64[ns]", "datetime64", "timedelta64[ns]"]
+            date_types = ["datetime64[ns]", "datetime64", "timedelta64[ns]",
+                          "datetime64[ns, UTC]"]
             if self.df[column].dtype in date_types:
-                self.df[column] = self.df[column].astype(
-                    str).str.replace("NaT", "")
+                self.df[column] = self.df[column].astype(str).str.replace("NaT", "")
             elif self.df[column].dtype.name == "category":
                 self.df[column] = self.df[column].astype(str)
         # Replace missing values with something else
