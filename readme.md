@@ -59,13 +59,14 @@ The class inherits four arguments from the Spreadsheet class:
 - **correct_lists**: Bool, default=False
   - If True, the lists stored as the data frame entries are modified to be more readable in the traditional spreadsheet softwares. This happens in four ways. (1) Empty lists are replaced by missing values. (2) Missing values are removed from within the lists. (3) Lists of len 1 are replaced by the single element they contain. (4) Lists are replaced by str formed by their elements separated by commas.
 
-There are then two native arguments of the class:
+There are then three native arguments of the class:
 - **google_workbook_name**: str, (mandatory)
   - The name of the Google Sheet project which should be the data upload target.
 - **sheet_id**: str or int, default=0
   - Argument to identify the target sheet within the workbook. If int, it is interpreted as sheet index, if str as the sheet name.
-- **json_file_path**: str, default=None
-  - If None, it is assumed that the json file for the authentication is in the default folder "~/.config/gspread/your_file.json". Provide a path to make the class search for the file elsewhere.
+- **auth_keys**: None or str or dict, default=None
+  - If None, it is assumed that the json file for the authentication is in
+  the default folder "~/.config/gspread/your_file.json". If str, it is the custom path of the json authentication file. If dict, it contains the parsed content of the authentication file.
 
 ## 3.2. Attributes
 The CustomExcel object inherits four attributes from the Spreadsheet class:
