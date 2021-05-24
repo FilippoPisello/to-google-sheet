@@ -1,13 +1,9 @@
 # Author: Filippo Pisello
-from spreadsheet import Spreadsheet
 from typing import List, Dict, Union
 
 import gspread
 
-# Note: the following is just a local import, you can do it as you want
-import sys
-sys.path.append(
-    r"C:\Users\Filippo Pisello\Desktop\Python\Git Projects\Git_Spreadsheet")
+from spreadsheet import Spreadsheet
 
 
 class GoogleSheet(Spreadsheet):
@@ -46,9 +42,16 @@ class GoogleSheet(Spreadsheet):
         to make the class search for the file elsewhere.
     """
 
-    def __init__(self, dataframe, google_workbook_name: str, sheet_id=0,
-                 index=False, starting_cell="A1", correct_lists=True,
-                 json_file_path=None):
+    def __init__(
+        self,
+        dataframe,
+        google_workbook_name: str,
+        sheet_id: Union[str, int] = 0,
+        index: bool = False,
+        starting_cell: str = "A1",
+        correct_lists: bool = True,
+        json_file_path: Union[None, str] = None,
+    ):
         super().__init__(dataframe, index, starting_cell, correct_lists)
         self.workbook = self.get_workbook(google_workbook_name, json_file_path)
         self.sheet = self.get_sheet(sheet_id)
@@ -59,7 +62,9 @@ class GoogleSheet(Spreadsheet):
     # 1.1 - Functions to define the class attributes
     # --------------------------------
     @staticmethod
-    def get_workbook(workbook_name, json_file_path) -> gspread.Spreadsheet:
+    def get_workbook(
+        workbook_name: str, json_file_path: Union[None, str]
+    ) -> gspread.Spreadsheet:
         """
         Gathers the authorization and returns a workbook object.
 
@@ -76,7 +81,7 @@ class GoogleSheet(Spreadsheet):
         # Get the instance of the Spreadsheet
         return gc.open(workbook_name)
 
-    def get_sheet(self, sheet_id) -> gspread.Worksheet:
+    def get_sheet(self, sheet_id: Union[str, int]) -> gspread.Worksheet:
         """
         Returns the sheet object corresponding to the workbook's sheet, given
         user input on sheet_id.
@@ -88,7 +93,9 @@ class GoogleSheet(Spreadsheet):
     # --------------------------------
     # 1.2 - Main Methods
     # --------------------------------
-    def to_google_sheet(self, fill_na_with=" ", clear_sheet=False, header=True):
+    def to_google_sheet(
+        self, fill_na_with: str = " ", clear_sheet: bool = False, header: bool = True
+    ):
         """
         Exports data frame to target sheet within a Google Sheet workbook.
 
@@ -133,8 +140,12 @@ class GoogleSheet(Spreadsheet):
         """
         # Convert datetime columns into string
         for column in self.df.columns:
-            date_types = ["datetime64[ns]", "datetime64", "timedelta64[ns]",
-                          "datetime64[ns, UTC]"]
+            date_types = [
+                "datetime64[ns]",
+                "datetime64",
+                "timedelta64[ns]",
+                "datetime64[ns, UTC]",
+            ]
             if self.df[column].dtype in date_types:
                 self.df[column] = self.df[column].astype(str).str.replace("NaT", "")
             elif self.df[column].dtype.name == "category":
@@ -154,16 +165,17 @@ class GoogleSheet(Spreadsheet):
         It can contain up to three dictionaries if header index and body are kept.
         """
         # Body is always exported
-        output = [{"range": self.body.cells_range,
-                   "values": self.df.values.tolist()}]
+        output = [{"range": self.body.cells_range, "values": self.df.values.tolist()}]
         # If header is kept, add to batch list
         if keep_header:
-            output.append({"range": self.header.cells_range,
-                           "values": self._columns_for_batch()})
+            output.append(
+                {"range": self.header.cells_range, "values": self._columns_for_batch()}
+            )
         # If index is kept, add to batch list
         if self.keep_index:
-            output.append({"range": self.index.cells_range,
-                           "values": self._index_for_batch()})
+            output.append(
+                {"range": self.index.cells_range, "values": self._index_for_batch()}
+            )
         return output
 
     def _columns_for_batch(self) -> Union[List[List], List[str]]:
@@ -181,8 +193,7 @@ class GoogleSheet(Spreadsheet):
         if self.indexes_depth[1] > 1:
             output = []
             for level in range(self.indexes_depth[1]):
-                output.append([i[level]
-                              for i in self.df.columns.values.tolist()])
+                output.append([i[level] for i in self.df.columns.values.tolist()])
             return output
         # Handling case with simple columns
         return [self.df.columns.values.tolist()]
