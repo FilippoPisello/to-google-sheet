@@ -26,7 +26,8 @@ class GoogleSheet(Spreadsheet):
         The name of the Google Sheet workbook which should receive the data.
     sheet_id: str or int, default=0
         Argument to identify the target sheet within the workbook. If int, it is
-        interpreted as sheet index, if str as sheet name.
+        interpreted as sheet index, if str as sheet name. If str and no sheet
+        is found, a sheet with the provided label is created.
     index: Bool, default=False
         If True, the index is exported together with the header and body.
     starting_cell: str, default="A1"
@@ -106,11 +107,19 @@ class GoogleSheet(Spreadsheet):
 
     def get_sheet(self, sheet_id: Union[str, int]) -> gspread.Worksheet:
         """
-        Returns the sheet object corresponding to the workbook's sheet, given
-        user input on sheet_id.
+        Returns the worksheet object for the requested sheet.
+
+        ---------------
+        If sheet_id is str, it is interpreted as the sheet name. If no sheet
+        is found for the given name, a new sheet is created. If sheet_id is int,
+        it is interpreted as the sheet index.
         """
         if isinstance(sheet_id, str):
-            return self.workbook.worksheet(sheet_id)
+            try:
+                return self.workbook.worksheet(sheet_id)
+            except gspread.WorksheetNotFound:
+                self.workbook.add_worksheet(title=sheet_id, rows="100", cols="20")
+                return self.workbook.worksheet(sheet_id)
         return self.workbook.get_worksheet(sheet_id)
 
     # --------------------------------

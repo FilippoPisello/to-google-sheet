@@ -63,7 +63,7 @@ There are then three native arguments of the class:
 - **google_workbook_name**: str, (mandatory)
   - The name of the Google Sheet project which should be the data upload target.
 - **sheet_id**: str or int, default=0
-  - Argument to identify the target sheet within the workbook. If int, it is interpreted as sheet index, if str as the sheet name.
+  - Argument to identify the target sheet within the workbook. If int, it is interpreted as sheet index, if str as the sheet name. If str matches no existing sheet, a new one is created.
 - **auth_keys**: None or str or dict, default=None
   - If None, it is assumed that the json file for the authentication is in
   the default folder "~/.config/gspread/your_file.json". If str, it is the custom path of the json authentication file. If dict, it contains the parsed content of the authentication file.
