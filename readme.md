@@ -60,8 +60,8 @@ The class inherits four arguments from the Spreadsheet class:
   - If True, the lists stored as the data frame entries are modified to be more readable in the traditional spreadsheet softwares. This happens in four ways. (1) Empty lists are replaced by missing values. (2) Missing values are removed from within the lists. (3) Lists of len 1 are replaced by the single element they contain. (4) Lists are replaced by str formed by their elements separated by commas.
 
 There are then three native arguments of the class:
-- **google_workbook_name**: str, (mandatory)
-  - The name of the Google Sheet project which should be the data upload target.
+- **google_workbook_id**: str, (mandatory)
+  - Either the title or the key of the workbook the data should be pushed to.
 - **sheet_id**: str or int, default=0
   - Argument to identify the target sheet within the workbook. If int, it is interpreted as sheet index, if str as the sheet name. If str matches no existing sheet, a new one is created.
 - **auth_keys**: None or str or dict, default=None

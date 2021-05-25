@@ -22,8 +22,8 @@ class GoogleSheet(Spreadsheet):
     ----------------
     dataframe: pandas dataframe object (mandatory)
         Dataframe to be considered.
-    google_workbook_name: str (mandatory)
-        The name of the Google Sheet workbook which should receive the data.
+    google_workbook_id: str (mandatory)
+        Title or key of the Google Sheet workbook which should receive the data.
     sheet_id: str or int, default=0
         Argument to identify the target sheet within the workbook. If int, it is
         interpreted as sheet index, if str as sheet name. If str and no sheet
@@ -47,7 +47,7 @@ class GoogleSheet(Spreadsheet):
     def __init__(
         self,
         dataframe,
-        google_workbook_name: str,
+        google_workbook_id: str,
         sheet_id: Union[str, int] = 0,
         index: bool = False,
         starting_cell: str = "A1",
@@ -55,7 +55,7 @@ class GoogleSheet(Spreadsheet):
         auth_keys: Union[None, str, dict] = None,
     ):
         super().__init__(dataframe, index, starting_cell, correct_lists)
-        self.workbook = self.get_workbook(google_workbook_name, auth_keys)
+        self.workbook = self.get_workbook(google_workbook_id, auth_keys)
         self.sheet = self.get_sheet(sheet_id)
 
     # -------------------------------------------------------------------------
@@ -65,15 +65,21 @@ class GoogleSheet(Spreadsheet):
     # --------------------------------
     @staticmethod
     def get_workbook(
-        workbook_name: str, auth_keys: Union[None, str, dict]
+        workbook_id: str, auth_keys: Union[None, str, dict]
     ) -> gspread.Spreadsheet:
         """
         Gathers the authorization and returns a workbook object
         """
         # Gather authentication
         g_client = GoogleSheet.authentication(auth_keys)
-        # Get the instance of the Spreadsheet
-        return g_client.open(workbook_name)
+        # Get the instance of the Spreadsheet: since keys are 44 chars long, try
+        # to use str as a key only if the workbook_id matches that len
+        if len(workbook_id) == 44:
+            try:
+                return g_client.open_by_key(workbook_id)
+            except gspread.SpreadsheetNotFound:
+                pass
+        return g_client.open(workbook_id)
 
     @staticmethod
     def authentication(auth_keys: Union[None, str, dict]) -> gspread.client.Client:
