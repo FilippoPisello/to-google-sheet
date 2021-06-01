@@ -1,4 +1,9 @@
-# Table of Contents <!-- omit in toc -->
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Python 3.8+](https://img.shields.io/badge/python-3.5+-blue.svg)](https://www.python.org/downloads/release/python-360/)
+# Export pandas data frames to Google Sheet <!-- omit in toc -->
+This module allows you to export a pandas data frame into Google Sheet in just two lines of code.
+
+## Table of Contents <!-- omit in toc -->
 - [1. Overview.](#1-overview)
   - [1.1. Goal of the project](#11-goal-of-the-project)
   - [1.2. Code structure](#12-code-structure)
@@ -10,7 +15,7 @@
   - [3.4. Methods](#34-methods)
     - [3.4.1. to_google_sheet()](#341-to_google_sheet)
 
-# 1. Overview.
+## 1. Overview.
 The GoogleSheet class allows the user to rapidly export a pandas data frame to a sheet within a Google Sheet workbook. It relies mostly on the gspread module which works as an intermediary with the Google Sheet API.
 
 To be able to complete these operations, some quick steps on the Google Console should be carried out. [This article from the gspread library ](https://gspread.readthedocs.io/en/latest/oauth2.html) provides a detailed explanation on what to do. In summary:
@@ -19,10 +24,10 @@ To be able to complete these operations, some quick steps on the Google Console 
 
 CustomExcel is a subclass of the Spreadsheet class, whose code and doc can be found [at this link](https://github.com/FilippoPisello/Spreadsheet).
 
-## 1.1. Goal of the project
+### 1.1. Goal of the project
 The aim of this class is to speed up the upload process to Google Sheet, making it as similar as possible to a regular output to excel, as it happens in pandas through the built-in method dataframe.to_excel().
 
-## 1.2. Code structure
+### 1.2. Code structure
 The code is designed to convey a hierarchical division of the class' methods. Different code portions are introduced by comment blocks which are made of two compact lines of "#" having a number in between.
 
 The sections are structured as follows:
@@ -35,7 +40,7 @@ The methods' are ordered so that if method B is invoked by method A, then B will
 
 The individual methods are designed to follow as closely as possible the **single-responsibility principle**. Some of them are **protected** - their name is preceded by an underscore. This is done for two main reasons. First, not to clutter excessively the help text of the class, since protected methods are not displayed in this output. This allows the focus to be kept on the most important elements. Second, protection is in place to clearly signal which are the methods meant to be used only internally.
 
-# 2. Required packages
+## 2. Required packages
 CustomExcel requires the following custom module created by me:
 - **Spreadsheet** [_link_](https://github.com/FilippoPisello/Spreadsheet)
 
@@ -47,8 +52,8 @@ And on the following additional packages:
 - **gspread**
 - **numpy** _[by Spreadsheet class]_
 
-# 3. Class elements
-## 3.1. Arguments
+## 3. Class elements
+### 3.1. Arguments
 The class inherits four arguments from the Spreadsheet class:
 - **dataframe** : pandas data frame object (mandatory)
   - The pandas data frame to be considered.
@@ -68,7 +73,7 @@ There are then three native arguments of the class:
   - If None, it is assumed that the json file for the authentication is in
   the default folder "~/.config/gspread/your_file.json". If str, it is the custom path of the json authentication file. If dict, it contains the parsed content of the authentication file.
 
-## 3.2. Attributes
+### 3.2. Attributes
 The CustomExcel object inherits four attributes from the Spreadsheet class:
 - **self.df** : pandas data frame object
 - **self.keep_index** : Bool
@@ -79,7 +84,7 @@ There are then two native attributes:
 - **self.sheet**: gspread.Spreadsheet object
 - **self.workbook**: gspread.Worksheet object
 
-## 3.3. Properties
+### 3.3. Properties
 The CustomExcel object inherits eight properties from the Spreadsheet class:
 - **self.indexes_depth**: [int, int]
 - **self.header_coordinates**: [[int, int], [int, int]]
@@ -92,10 +97,10 @@ The CustomExcel object inherits eight properties from the Spreadsheet class:
 
 Details on these can be found at this [_link_](https://github.com/FilippoPisello/Spreadsheet).
 
-## 3.4. Methods
+### 3.4. Methods
 This section just includes the methods which are meant to be accessed by the user. These can be found in part 1. For further info on the worker methods please consult their docstrings.
 
-### 3.4.1. to_google_sheet()
+#### 3.4.1. to_google_sheet()
 ```python
 obj.to_google_sheet(self, fill_na_with=" ", clear_sheet=False, header=True)
 ```
