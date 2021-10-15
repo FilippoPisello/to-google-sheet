@@ -7,6 +7,9 @@ This module allows you to export a pandas data frame into Google Sheet in just t
 - [1. Overview.](#1-overview)
   - [1.1. Goal of the project](#11-goal-of-the-project)
   - [1.2. Code structure](#12-code-structure)
+- [2. Usage examples](#2-usage-examples)
+  - [2.1. Usage with implicit json oauth file call](#21-usage-with-implicit-json-oauth-file-call)
+  - [2.2. Usage with explicit json oauth file call](#22-usage-with-explicit-json-oauth-file-call)
 - [2. Required packages](#2-required-packages)
 - [3. Class elements](#3-class-elements)
   - [3.1. Arguments](#31-arguments)
@@ -27,20 +30,22 @@ CustomExcel is a subclass of the Spreadsheet class, whose code and doc can be fo
 ### 1.1. Goal of the project
 The aim of this class is to speed up the upload process to Google Sheet, making it as similar as possible to a regular output to excel, as it happens in pandas through the built-in method dataframe.to_excel().
 
-### 1.2. Code structure
-The code is designed to convey a hierarchical division of the class' methods. Different code portions are introduced by comment blocks which are made of two compact lines of "#" having a number in between.
+## 2. Usage examples
+As an example, suppose that you want to send the pandas data frame *df* to the first sheet of the Google Sheet workbook named *"MyWork"*. For this to work correctly, the workbook **needs to be shared with edit permission with the email specified in the json authentication file**.
 
-The sections are structured as follows:
-- **Part 1**: main elements
-  - **Part 1.1**: properties
-  - **Part 1.2**: main methods
-- **Part 2**: worker methods
-
-The methods' are ordered so that if method B is invoked by method A, then B will be below A. This structure should hopefully help the reader to understand how the simple pieces are assembled to construct more complex items.
-
-The individual methods are designed to follow as closely as possible the **single-responsibility principle**. Some of them are **protected** - their name is preceded by an underscore. This is done for two main reasons. First, not to clutter excessively the help text of the class, since protected methods are not displayed in this output. This allows the focus to be kept on the most important elements. Second, protection is in place to clearly signal which are the methods meant to be used only internally.
-
-## 2. Required packages
+### 2.1. Usage with implicit json oauth file call
+If you choose to save the json oauth file as "credentials.json" in the default folder specified by the gspread library ([doc](https://gspread.readthedocs.io/en/latest/oauth2.html)) - in my case it was *"C:\Users\MyUser\AppData\Roaming\gspread"* - the usage is as follows:
+```python
+sheet = GoogleSheet(dataframe=df, google_workbook_id="MyWork")
+sheet.to_google_sheet()
+```
+### 2.2. Usage with explicit json oauth file call
+The json file can also be kept in any other arbitrary folder. In this case, the path to the json file needs to be passed for the parameter **auth_keys**. For the following example suppose that the json file was named  *"credentials.json"* and placed in the *"auth"* folder inside the working directory. The the usage is the following:
+```python
+sheet = GoogleSheet(dataframe=df, google_workbook_id="MyWork", auth_keys="auth\credentials.json")
+sheet.to_google_sheet()
+```
+## 3. Required packages
 CustomExcel requires the following custom module created by me:
 - **Spreadsheet** [_link_](https://github.com/FilippoPisello/Spreadsheet)
 
